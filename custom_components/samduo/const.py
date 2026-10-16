@@ -101,6 +101,18 @@ SETTING_QUARTER_HOUR_PERIODS = "quarter_hour_periods"
 SETTING_MANUAL_PERIODS = "manual_periods"
 SETTING_MANUAL_PERIODS_TOMORROW = "manual_periods_tomorrow"
 
+# Number of cheap and expensive periods per day: 3 with hourly prices, 12 with
+# quarter-hourly ones (the same three hours). Switching the period length
+# re-applies these to today and tomorrow.
+PERIOD_COUNT_HOURLY = 3
+PERIOD_COUNT_QUARTER_HOURLY = 12
+PERIOD_COUNT_SETTINGS = (
+    SETTING_CHEAP_PERIODS,
+    SETTING_EXPENSIVE_PERIODS,
+    SETTING_CHEAP_PERIODS_TOMORROW,
+    SETTING_EXPENSIVE_PERIODS_TOMORROW,
+)
+
 # Recommended values (the "apply recommended settings" button writes these).
 RECOMMENDED_SETTINGS: dict[str, float | bool | str] = {
     SETTING_CHARGE_START: -300,
@@ -110,19 +122,20 @@ RECOMMENDED_SETTINGS: dict[str, float | bool | str] = {
     SETTING_MIN_SOC: 10,
     SETTING_MAX_SOC: 100,
     SETTING_MIN_SPREAD: 25,
-    SETTING_CHEAP_PERIODS: 3,
-    SETTING_EXPENSIVE_PERIODS: 21,
-    SETTING_CHEAP_PERIODS_TOMORROW: 3,
-    SETTING_EXPENSIVE_PERIODS_TOMORROW: 21,
+    SETTING_CHEAP_PERIODS: PERIOD_COUNT_HOURLY,
+    SETTING_EXPENSIVE_PERIODS: PERIOD_COUNT_HOURLY,
+    SETTING_CHEAP_PERIODS_TOMORROW: PERIOD_COUNT_HOURLY,
+    SETTING_EXPENSIVE_PERIODS_TOMORROW: PERIOD_COUNT_HOURLY,
     SETTING_EXPORT_CORRECTION: 0.0,
     SETTING_SOC_PROTECTION: True,
-    SETTING_QUARTER_HOUR_PERIODS: False,
     SETTING_MANUAL_PERIODS: "",
     SETTING_MANUAL_PERIODS_TOMORROW: "",
 }
 
 DEFAULT_SETTINGS: dict[str, float | bool | str] = {
     **RECOMMENDED_SETTINGS,
+    # The period length belongs to the price sensor, not to the recommendations.
+    SETTING_QUARTER_HOUR_PERIODS: False,
     SETTING_MANUAL_POWER: 0,
     SETTING_MAX_CHARGE_POWER: DEFAULT_MAX_POWER,
     SETTING_MAX_DISCHARGE_POWER: DEFAULT_MAX_POWER,

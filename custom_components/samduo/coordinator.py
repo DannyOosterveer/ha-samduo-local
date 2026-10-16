@@ -52,6 +52,9 @@ from .const import (
     MANUFACTURER,
     MIN_POLL_INTERVAL,
     P1_MODES,
+    PERIOD_COUNT_HOURLY,
+    PERIOD_COUNT_QUARTER_HOURLY,
+    PERIOD_COUNT_SETTINGS,
     PRICE_MODES,
     RECOMMENDED_SETTINGS,
     RELEASE_TIMEOUT_S,
@@ -431,14 +434,23 @@ class SamduoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         if self.settings.get(key) == value:
             return
         self.settings[key] = value
+        if key == SETTING_QUARTER_HOUR_PERIODS:
+            self._apply_period_counts()
         self.async_update_listeners()
         await self.async_request_refresh()
+
+    def _apply_period_counts(self) -> None:
+        """Hourly prices: 3 cheap and 3 expensive periods; quarter-hourly: 12."""
+        count = PERIOD_COUNT_QUARTER_HOURLY if self.settings[SETTING_QUARTER_HOUR_PERIODS] else PERIOD_COUNT_HOURLY
+        for key in PERIOD_COUNT_SETTINGS:
+            self.settings[key] = count
 
     def restore_setting(self, key: str, value: Any) -> None:
         self.settings[key] = value
 
     async def async_apply_recommended_settings(self) -> None:
         self.settings.update(RECOMMENDED_SETTINGS)
+        self._apply_period_counts()
         _LOGGER.info("Recommended settings applied")
         self.async_update_listeners()
         await self.async_request_refresh()

@@ -81,7 +81,7 @@ Then open **Configure** on the integration and pick:
 
 Press **Apply recommended settings** once to load sensible defaults (−300 W to
 start charging, 100 W to start discharging, margins of 50 W / 5 W, SOC 10–100 %,
-minimum spread 25 %).
+minimum spread 25 %, 3 cheap and 3 expensive periods).
 
 ## Modes
 
@@ -119,8 +119,9 @@ so meter noise does not make the battery flap.
 
 With a price sensor configured, the integration picks the *N cheapest* and
 *M most expensive* periods of the day (settings for today and tomorrow; tomorrow's
-values roll over at midnight). Periods are hourly by default; switch
-**15-minute periods** on for quarter-hourly prices.
+values roll over at midnight). Periods are hourly by default with 3 cheap and 3
+expensive periods; switch **15-minute periods** on for quarter-hourly prices, which
+sets both counts to 12 (the same three hours).
 
 - **Spread** = (average expensive − export correction − average cheap) / average cheap, in %.
 - **Spread NOM** uses only the expensive periods *after* the first cheap one: energy
@@ -216,14 +217,14 @@ view; *Config* entities are the strategy settings and survive a restart.
 | `number.samduo_maximum_soc` | 50 … 100 % | 100 | Charging stops here |
 | `number.samduo_minimum_spread` | 0 … 500 % | 25 | Dynamic modes act only when the spread is at least this |
 | `number.samduo_export_correction` | 0 … 0.5 €/kWh | 0 | Taken off the expensive average in the spread |
-| `number.samduo_cheap_periods_today` | 0 … 96 | 3 | Number of cheapest periods to charge in |
-| `number.samduo_expensive_periods_today` | 0 … 96 | 21 | Number of most expensive periods to discharge in |
-| `number.samduo_cheap_periods_tomorrow` | 0 … 96 | 3 | Copied to *today* at midnight |
-| `number.samduo_expensive_periods_tomorrow` | 0 … 96 | 21 | Copied to *today* at midnight |
+| `number.samduo_cheap_periods_today` | 0 … 96 | 3 (12 with 15-minute periods) | Number of cheapest periods to charge in |
+| `number.samduo_expensive_periods_today` | 0 … 96 | 3 (12 with 15-minute periods) | Number of most expensive periods to discharge in |
+| `number.samduo_cheap_periods_tomorrow` | 0 … 96 | 3 (12) | Copied to *today* at midnight |
+| `number.samduo_expensive_periods_tomorrow` | 0 … 96 | 3 (12) | Copied to *today* at midnight |
 | `text.samduo_manual_periods_today` | | empty | `G02:00;D18:00-21:00` overrides the automatic selection |
 | `text.samduo_manual_periods_tomorrow` | | empty | Copied to *today* at midnight, then cleared |
 | `switch.samduo_soc_protection` | | on | Top up to the minimum SOC from the grid when below it |
-| `switch.samduo_15_minute_periods` | | off | Use quarter-hourly instead of hourly price periods |
+| `switch.samduo_15_minute_periods` | | off | Use quarter-hourly instead of hourly price periods; switching it sets the four period counts to 12 (on) or 3 (off) |
 
 ### Sign convention
 

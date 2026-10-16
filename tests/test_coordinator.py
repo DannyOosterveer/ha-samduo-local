@@ -246,3 +246,29 @@ async def test_settings_restored_after_restart(hass: HomeAssistant, setup_integr
     assert coordinator.settings["max_charge_power"] == 1500
     assert coordinator.settings["soc_protection"] is False
     assert hass.states.get("select.samduo_mode").state == "fast_charge"
+
+
+async def test_quarter_hour_switch_sets_period_counts(hass: HomeAssistant, setup_integration: MockConfigEntry) -> None:
+    assert hass.states.get("number.samduo_expensive_periods_today").state == "3"
+    await hass.services.async_call("switch", "turn_on", {"entity_id": "switch.samduo_15_minute_periods"}, blocking=True)
+    await hass.async_block_till_done()
+    for entity_id in (
+        "number.samduo_cheap_periods_today",
+        "number.samduo_expensive_periods_today",
+        "number.samduo_cheap_periods_tomorrow",
+        "number.samduo_expensive_periods_tomorrow",
+    ):
+        assert hass.states.get(entity_id).state == "12", entity_id
+    await hass.services.async_call(
+        "switch", "turn_off", {"entity_id": "switch.samduo_15_minute_periods"}, blocking=True
+    )
+    await hass.async_block_till_done()
+    assert hass.states.get("number.samduo_cheap_periods_tomorrow").state == "3"
+    # Recommended settings respect the period length.
+    await hass.services.async_call("switch", "turn_on", {"entity_id": "switch.samduo_15_minute_periods"}, blocking=True)
+    await set_number(hass, "number.samduo_cheap_periods_today", 20)
+    await hass.services.async_call(
+        "button", "press", {"entity_id": "button.samduo_apply_recommended_settings"}, blocking=True
+    )
+    await hass.async_block_till_done()
+    assert hass.states.get("number.samduo_cheap_periods_today").state == "12"
