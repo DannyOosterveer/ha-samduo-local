@@ -194,30 +194,44 @@ views:
             title: Power limits
             entities:
               - entity: number.samduo_max_charge_power
+                name: Max charge power
               - entity: number.samduo_max_discharge_power
+                name: Max discharge power
               - entity: number.samduo_manual_power
                 name: Manual power (manual mode)
           - type: entities
             title: Zero on the meter
             entities:
               - entity: number.samduo_start_discharging_at
+                name: Start discharging at
               - entity: number.samduo_discharge_margin
+                name: Discharge margin
               - entity: number.samduo_start_charging_at
+                name: Start charging at
               - entity: number.samduo_charge_margin
+                name: Charge margin
           - type: entities
             title: State of charge
             entities:
               - entity: number.samduo_minimum_soc
+                name: Minimum SOC
               - entity: number.samduo_maximum_soc
+                name: Maximum SOC
               - entity: switch.samduo_soc_protection
+                name: SOC protection
           - type: entities
             title: Device
             entities:
               - entity: switch.samduo_backup_output
+                name: Backup output
               - entity: button.samduo_release_control
+                name: Release control
               - entity: button.samduo_apply_recommended_settings
+                name: Apply recommended settings
               - entity: binary_sensor.samduo_control_blocked
+                name: Control blocked
               - entity: binary_sensor.samduo_grid_power_sensor
+                name: Grid power sensor
           - type: markdown
             title: Modes
             content: >
@@ -296,8 +310,11 @@ views:
             title: Today
             entities:
               - entity: number.samduo_cheap_periods_today
+                name: Cheap periods
               - entity: number.samduo_expensive_periods_today
+                name: Expensive periods
               - entity: text.samduo_manual_periods_today
+                name: Manual periods
               - type: attribute
                 entity: sensor.samduo_price_periods_today
                 attribute: cheap
@@ -354,11 +371,17 @@ views:
             title: Tomorrow and settings
             entities:
               - entity: number.samduo_cheap_periods_tomorrow
+                name: Cheap periods
               - entity: number.samduo_expensive_periods_tomorrow
+                name: Expensive periods
               - entity: text.samduo_manual_periods_tomorrow
+                name: Manual periods
               - entity: number.samduo_minimum_spread
+                name: Minimum spread
               - entity: number.samduo_export_correction
+                name: Export correction
               - entity: switch.samduo_15_minute_periods
+                name: 15-minute periods
 
   - title: Health
     path: health
@@ -376,16 +399,23 @@ views:
               - entity: sensor.samduo_battery_soh
                 name: State of health
               - entity: sensor.samduo_battery_voltage
+                name: Battery voltage
               - entity: sensor.samduo_inverter_temperature_1
+                name: Inverter temperature 1
               - entity: sensor.samduo_inverter_temperature_2
+                name: Inverter temperature 2
               - entity: sensor.samduo_inverter_status
+                name: Inverter status
               - entity: sensor.samduo_error_code
+                name: Error code
           - type: history-graph
             title: Temperatures (24 h)
             hours_to_show: 24
             entities:
               - entity: sensor.samduo_inverter_temperature_1
+                name: Inverter temperature 1
               - entity: sensor.samduo_inverter_temperature_2
+                name: Inverter temperature 2
       - type: grid
         cards:
           - type: heading
@@ -394,12 +424,19 @@ views:
           - type: entities
             entities:
               - entity: sensor.samduo_grid_voltage
+                name: Grid voltage
               - entity: sensor.samduo_grid_frequency
+                name: Grid frequency
               - entity: sensor.samduo_off_grid_voltage
+                name: Off-grid voltage
               - entity: sensor.samduo_backup_power
+                name: Backup power
               - entity: sensor.samduo_control_time_remaining
+                name: Control time remaining
               - entity: binary_sensor.samduo_dynamic_charging
+                name: Dynamic charging
               - entity: binary_sensor.samduo_dynamic_discharging
+                name: Dynamic discharging
           - type: history-graph
             title: Mode and strategy (24 h)
             hours_to_show: 24
