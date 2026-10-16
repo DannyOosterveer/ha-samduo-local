@@ -282,9 +282,6 @@ battery, and the client against a fake battery on a real socket.
 - SAMDUO, for publishing the Open API Protocol.
 - [Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK) for the strategy and
   dashboard design the modes are modelled on.
-- [StekkerDeal/samduo-local](https://github.com/StekkerDeal/samduo-local), whose
-  protocol reconnaissance (one service per message, mandatory ACK, bare JSON
-  framing, per-mille SOC) saved a lot of trial and error.
 
 ## License
 
