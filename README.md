@@ -11,7 +11,7 @@ eleven built-in charging strategies: from plain *zero on the meter* to trading o
 dynamic energy prices. Everything runs inside the integration; no YAML packages,
 no helper automations, no Node-RED.
 
-The strategies and the dashboard follow the great work by
+The strategies and the dashboard follow the great work from
 [Zendure zenSDK package by Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK).
 
 > **Status: early.** Built against the SAMDUO Open API Protocol V1.0 and tested
