@@ -134,11 +134,6 @@ The **Price periods today/tomorrow** sensors carry the full period list, with
 cheap/expensive flags, in their attributes; the dashboard charts are drawn from
 them.
 
-The plug-and-play dashboard with the mode selector, the control settings and the
-dynamic prices (cheap periods green, expensive red, hours gone by faded):
-
-![SAMDUO Nex dashboard](images/dashboard.png)
-
 ## Entities
 
 Entity ids below assume the battery is named *Samduo*. All sensors update every
@@ -241,9 +236,11 @@ integrations.
 ## Dashboard
 
 [`dashboard/samduo_dashboard.yaml`](dashboard/samduo_dashboard.yaml) is a complete
-plug-and-play dashboard: battery, control settings, dynamic prices, and a health
-view. It needs the [apexcharts-card](https://github.com/RomRider/apexcharts-card)
-from HACS.
+plug-and-play dashboard: battery, control settings, dynamic prices (cheap periods
+green, expensive red, hours gone by faded), and a health view. It needs the
+[apexcharts-card](https://github.com/RomRider/apexcharts-card) from HACS.
+
+![SAMDUO Nex dashboard](images/dashboard.png)
 
 1. Settings → Dashboards → **Add dashboard** → *New dashboard from scratch*.
 2. Open it → ⋮ → **Edit dashboard** → ⋮ → **Raw configuration editor**.
