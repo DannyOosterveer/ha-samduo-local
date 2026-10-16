@@ -11,9 +11,8 @@ eleven built-in charging strategies: from plain *zero on the meter* to trading o
 dynamic energy prices. Everything runs inside the integration; no YAML packages,
 no helper automations, no Node-RED.
 
-The strategies and the dashboard follow the well-known
-[Zendure zenSDK package by Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK),
-so if you come from there you will find the same modes and the same knobs.
+The strategies and the dashboard follow the great work by
+[Zendure zenSDK package by Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK).
 
 > **Status: early.** Built against the SAMDUO Open API Protocol V1.0 and tested
 > on a Nex E6000 (firmware 0.0.1.10). Other Nex models speak the same protocol per
@@ -24,7 +23,7 @@ so if you come from there you will find the same modes and the same knobs.
 | Device | Status |
 |---|---|
 | SAMDUO Nex E6000 | ✅ Tested |
-| SAMDUO Nex E6000H | Untested, same protocol per spec |
+| SAMDUO Nex E6000H | ✅ Tested |
 | SAMDUO Nex P2800 Pro | Untested, same protocol per spec |
 | SAMDUO Nex BP2800 | Untested, same protocol per spec |
 
