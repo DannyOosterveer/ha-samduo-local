@@ -1,0 +1,408 @@
+# SAMDUO Nex plug-and-play dashboard
+#
+# Requires the apexcharts-card from HACS (https://github.com/RomRider/apexcharts-card).
+# Entity ids assume the battery is named "Samduo" (the default). If you gave it
+# another name, replace "samduo_" with your name, e.g. "garage_battery_".
+#
+# Settings -> Dashboards -> Add dashboard -> New dashboard from scratch -> open it
+# -> Edit -> Raw configuration editor -> paste this file -> Save.
+title: Samduo
+views:
+  - title: Battery
+    path: battery
+    icon: mdi:home-battery
+    type: sections
+    max_columns: 3
+    sections:
+      # ── Column 1: battery ─────────────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery
+            icon: mdi:home-battery
+            badges:
+              - type: entity
+                entity: sensor.samduo_battery_soc
+              - type: entity
+                entity: sensor.samduo_battery_status
+                show_name: false
+              - type: entity
+                entity: sensor.samduo_available_energy
+                show_name: false
+          - type: tile
+            entity: select.samduo_mode
+            name: Mode
+            features:
+              - type: select-options
+            features_position: bottom
+          - type: tile
+            entity: sensor.samduo_strategy
+            name: Strategy
+            icon: mdi:brain
+            color: primary
+          - type: horizontal-stack
+            cards:
+              - type: tile
+                entity: sensor.samduo_battery_power
+                name: Battery
+                color: green
+              - type: tile
+                entity: sensor.samduo_grid_power
+                name: Grid
+                color: red
+              - type: tile
+                entity: sensor.samduo_house_consumption
+                name: House
+                color: blue
+          - type: custom:apexcharts-card
+            graph_span: 3h
+            update_interval: 10s
+            header:
+              show: true
+              title: Last 3 hours
+              show_states: true
+              colorize_states: true
+            apex_config:
+              chart:
+                height: 260
+              legend:
+                show: true
+              stroke:
+                width: 2
+              yaxis:
+                - id: power
+                  decimalsInFloat: 0
+                  title:
+                    text: W
+                - id: soc
+                  opposite: true
+                  min: 0
+                  max: 100
+                  decimalsInFloat: 0
+                  title:
+                    text: "%"
+            series:
+              - entity: sensor.samduo_battery_power
+                name: Battery
+                yaxis_id: power
+                type: area
+                color: "#4caf50"
+                opacity: 0.25
+                group_by:
+                  duration: 1min
+                  func: avg
+              - entity: sensor.samduo_grid_power
+                name: Grid
+                yaxis_id: power
+                type: area
+                color: "#f44336"
+                opacity: 0.2
+                group_by:
+                  duration: 1min
+                  func: avg
+              - entity: sensor.samduo_battery_soc
+                name: SOC
+                yaxis_id: soc
+                type: line
+                color: "#2196f3"
+                stroke_width: 2
+          - type: custom:apexcharts-card
+            graph_span: 24h
+            span:
+              start: day
+            header:
+              show: true
+              title: Today
+              show_states: false
+            apex_config:
+              chart:
+                height: 220
+              stroke:
+                width: 1
+              yaxis:
+                - id: power
+                  decimalsInFloat: 0
+                - id: soc
+                  opposite: true
+                  min: 0
+                  max: 100
+                  decimalsInFloat: 0
+            series:
+              - entity: sensor.samduo_battery_power
+                name: Battery
+                yaxis_id: power
+                type: area
+                color: "#4caf50"
+                opacity: 0.25
+                group_by:
+                  duration: 5min
+                  func: avg
+              - entity: sensor.samduo_grid_power
+                name: Grid
+                yaxis_id: power
+                type: area
+                color: "#f44336"
+                opacity: 0.2
+                group_by:
+                  duration: 5min
+                  func: avg
+              - entity: sensor.samduo_battery_soc
+                name: SOC
+                yaxis_id: soc
+                type: line
+                color: "#2196f3"
+          - type: entities
+            title: Energy
+            entities:
+              - entity: sensor.samduo_energy_charged
+                name: Charged (total)
+              - entity: sensor.samduo_energy_discharged
+                name: Discharged (total)
+              - entity: sensor.samduo_available_energy
+                name: Available now
+              - entity: sensor.samduo_energy_to_full
+                name: Needed to full
+              - type: conditional
+                conditions:
+                  - entity: sensor.samduo_battery_status
+                    state: discharging
+                row:
+                  entity: sensor.samduo_remaining_discharge_time
+                  name: Remaining discharge time
+              - type: conditional
+                conditions:
+                  - entity: sensor.samduo_battery_status
+                    state: charging
+                row:
+                  entity: sensor.samduo_remaining_charge_time
+                  name: Remaining charge time
+
+      # ── Column 2: control settings ────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Control
+            icon: mdi:tune
+            badges:
+              - type: entity
+                entity: binary_sensor.samduo_controlling
+                show_name: false
+              - type: entity
+                entity: sensor.samduo_power_setpoint
+                show_name: false
+          - type: entities
+            title: Power limits
+            entities:
+              - entity: number.samduo_max_charge_power
+              - entity: number.samduo_max_discharge_power
+              - entity: number.samduo_manual_power
+                name: Manual power (manual mode)
+          - type: entities
+            title: Zero on the meter
+            entities:
+              - entity: number.samduo_start_discharging_at
+              - entity: number.samduo_discharge_margin
+              - entity: number.samduo_start_charging_at
+              - entity: number.samduo_charge_margin
+          - type: entities
+            title: State of charge
+            entities:
+              - entity: number.samduo_minimum_soc
+              - entity: number.samduo_maximum_soc
+              - entity: switch.samduo_soc_protection
+          - type: entities
+            title: Device
+            entities:
+              - entity: switch.samduo_backup_output
+              - entity: button.samduo_release_control
+              - entity: button.samduo_apply_recommended_settings
+              - entity: binary_sensor.samduo_control_blocked
+              - entity: binary_sensor.samduo_grid_power_sensor
+          - type: markdown
+            title: Modes
+            content: >
+              **Standby** – battery does nothing (released). **Manual** – holds the manual power.
+              **Zero on the meter** – discharges on import, charges on export.
+              **Dynamic NOM** – charges in the cheapest hours, then NOM.
+              **Dynamic NOM (expensive only)** – charges cheap, discharges NOM only in expensive hours.
+              **Dynamic trading** – charges cheap, discharges at full power when expensive.
+              **Dynamic trading + NOM** – same, but NOM in between.
+              **Smart charge/discharge only** – one direction of NOM.
+              **Fast charge/discharge** – full power until the SOC limit.
+
+      # ── Column 3: dynamic prices ──────────────────────────────────────────
+      - type: grid
+        cards:
+          - type: heading
+            heading: Dynamic prices
+            icon: mdi:cash-multiple
+            badges:
+              - type: entity
+                entity: sensor.samduo_current_price
+                show_name: false
+              - type: entity
+                entity: binary_sensor.samduo_cheap_period
+                show_name: false
+              - type: entity
+                entity: binary_sensor.samduo_expensive_period
+                show_name: false
+          - type: custom:apexcharts-card
+            graph_span: 24h
+            span:
+              start: day
+            now:
+              show: true
+              label: now
+            header:
+              show: true
+              title: Prices today
+              show_states: false
+            apex_config:
+              chart:
+                height: 220
+              yaxis:
+                decimalsInFloat: 2
+            series:
+              - entity: sensor.samduo_price_periods_today
+                name: Price
+                type: column
+                unit: €/kWh
+                color: "#9e9e9e"
+                data_generator: |
+                  return (entity.attributes.periods || []).map(p => [new Date(p.start).getTime(), p.value]);
+              - entity: sensor.samduo_price_periods_today
+                name: Cheap
+                type: column
+                unit: €/kWh
+                color: "#4caf50"
+                data_generator: |
+                  return (entity.attributes.periods || []).filter(p => p.cheap).map(p => [new Date(p.start).getTime(), p.value]);
+              - entity: sensor.samduo_price_periods_today
+                name: Expensive
+                type: column
+                unit: €/kWh
+                color: "#f44336"
+                data_generator: |
+                  return (entity.attributes.periods || []).filter(p => p.expensive).map(p => [new Date(p.start).getTime(), p.value]);
+          - type: horizontal-stack
+            cards:
+              - type: tile
+                entity: sensor.samduo_spread
+                name: Spread
+              - type: tile
+                entity: sensor.samduo_spread_nom
+                name: Spread NOM
+          - type: entities
+            title: Today
+            entities:
+              - entity: number.samduo_cheap_periods_today
+              - entity: number.samduo_expensive_periods_today
+              - entity: text.samduo_manual_periods_today
+              - type: attribute
+                entity: sensor.samduo_price_periods_today
+                attribute: cheap
+                name: Cheapest periods
+              - type: attribute
+                entity: sensor.samduo_price_periods_today
+                attribute: expensive
+                name: Most expensive periods
+          - type: custom:apexcharts-card
+            graph_span: 24h
+            span:
+              start: day
+              offset: +1d
+            header:
+              show: true
+              title: Prices tomorrow
+              show_states: false
+            apex_config:
+              chart:
+                height: 220
+              yaxis:
+                decimalsInFloat: 2
+            series:
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Price
+                type: column
+                unit: €/kWh
+                color: "#9e9e9e"
+                data_generator: |
+                  return (entity.attributes.periods || []).map(p => [new Date(p.start).getTime(), p.value]);
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Cheap
+                type: column
+                unit: €/kWh
+                color: "#4caf50"
+                data_generator: |
+                  return (entity.attributes.periods || []).filter(p => p.cheap).map(p => [new Date(p.start).getTime(), p.value]);
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Expensive
+                type: column
+                unit: €/kWh
+                color: "#f44336"
+                data_generator: |
+                  return (entity.attributes.periods || []).filter(p => p.expensive).map(p => [new Date(p.start).getTime(), p.value]);
+          - type: horizontal-stack
+            cards:
+              - type: tile
+                entity: sensor.samduo_spread_tomorrow
+                name: Spread
+              - type: tile
+                entity: sensor.samduo_spread_nom_tomorrow
+                name: Spread NOM
+          - type: entities
+            title: Tomorrow and settings
+            entities:
+              - entity: number.samduo_cheap_periods_tomorrow
+              - entity: number.samduo_expensive_periods_tomorrow
+              - entity: text.samduo_manual_periods_tomorrow
+              - entity: number.samduo_minimum_spread
+              - entity: number.samduo_export_correction
+              - entity: switch.samduo_15_minute_periods
+
+  - title: Health
+    path: health
+    icon: mdi:battery-heart-variant
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Battery health
+            icon: mdi:battery-heart-variant
+          - type: entities
+            entities:
+              - entity: sensor.samduo_battery_soh
+                name: State of health
+              - entity: sensor.samduo_battery_voltage
+              - entity: sensor.samduo_inverter_temperature_1
+              - entity: sensor.samduo_inverter_temperature_2
+              - entity: sensor.samduo_inverter_status
+              - entity: sensor.samduo_error_code
+          - type: history-graph
+            title: Temperatures (24 h)
+            hours_to_show: 24
+            entities:
+              - entity: sensor.samduo_inverter_temperature_1
+              - entity: sensor.samduo_inverter_temperature_2
+      - type: grid
+        cards:
+          - type: heading
+            heading: Grid and control
+            icon: mdi:transmission-tower
+          - type: entities
+            entities:
+              - entity: sensor.samduo_grid_voltage
+              - entity: sensor.samduo_grid_frequency
+              - entity: sensor.samduo_off_grid_voltage
+              - entity: sensor.samduo_backup_power
+              - entity: sensor.samduo_control_time_remaining
+              - entity: binary_sensor.samduo_dynamic_charging
+              - entity: binary_sensor.samduo_dynamic_discharging
+          - type: history-graph
+            title: Mode and strategy (24 h)
+            hours_to_show: 24
+            entities:
+              - entity: select.samduo_mode
+              - entity: sensor.samduo_strategy

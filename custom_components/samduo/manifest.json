@@ -1,0 +1,14 @@
+{
+  "domain": "samduo",
+  "name": "SAMDUO Nex",
+  "codeowners": ["@DannyOosterveer"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/DannyOosterveer/ha-samduo-local",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/DannyOosterveer/ha-samduo-local/issues",
+  "requirements": [],
+  "version": "0.1.0",
+  "zeroconf": ["_samduo._tcp.local."]
+}

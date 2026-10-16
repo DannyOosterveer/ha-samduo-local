@@ -1,0 +1,204 @@
+{
+  "config": {
+    "flow_title": "{name} ({host})",
+    "step": {
+      "user": {
+        "title": "SAMDUO Nex-batterij",
+        "description": "Verbind met een SAMDUO Nex-batterij op je lokale netwerk. Het serienummer wordt uit de batterij gelezen. Zet 'HEMS Managed' UIT in de SAMDUO-app, anders negeert de batterij elke opdracht.",
+        "data": {
+          "host": "Host",
+          "port": "Poort",
+          "name": "Naam"
+        },
+        "data_description": {
+          "host": "IP-adres of hostnaam van de batterij",
+          "port": "TCP-poort van de Open API (standaard 3335)",
+          "name": "Naam van de batterij in Home Assistant; dit wordt ook het voorvoegsel van de entiteit-id's"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "SAMDUO-batterij gevonden",
+        "description": "De {model} op {host} (serienummer {serial}) toevoegen? Zet 'HEMS Managed' UIT in de SAMDUO-app voordat je een van de aansturingsmodi gebruikt.",
+        "data": {
+          "name": "Naam"
+        },
+        "data_description": {
+          "name": "Naam van de batterij in Home Assistant; dit wordt ook het voorvoegsel van de entiteit-id's"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Kon de batterij niet bereiken. Controleer host en poort en sluit de SAMDUO-app: de batterij beantwoordt maar één verbinding tegelijk."
+    },
+    "abort": {
+      "already_configured": "Deze batterij is al geconfigureerd",
+      "not_supported": "Dit SAMDUO-apparaat is geen ondersteunde batterij"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SAMDUO Nex-opties",
+        "data": {
+          "host": "Host",
+          "port": "Poort",
+          "grid_power_entity": "Netvermogen-sensor (P1)",
+          "price_entity": "Energieprijs-sensor",
+          "capacity_kwh": "Batterijcapaciteit (kWh)",
+          "poll_interval": "Uitleesinterval (seconden)",
+          "keepalive_interval": "Verversinterval setpoint (seconden)",
+          "control_timeout": "Watchdog-timeout aansturing (seconden)"
+        },
+        "data_description": {
+          "host": "IP-adres of hostnaam van de batterij",
+          "port": "TCP-poort van de Open API (standaard 3335)",
+          "grid_power_entity": "Vermogen op de meter in watt: positief = afname, negatief = teruglevering. Nodig voor elke nul-op-de-meter-modus. Een HomeWizard P1 of een andere snelle P1/CT-sensor werkt.",
+          "price_entity": "Een sensor met de prijzen van vandaag (en morgen) in de attributen, zoals Nordpool, ENTSO-e of EnergyZero. Nodig voor de dynamische modi.",
+          "capacity_kwh": "Gebruikt voor de sensoren beschikbare/benodigde energie en resterende tijd",
+          "poll_interval": "Hoe vaak de batterij wordt uitgelezen en de strategie draait (standaard 5)",
+          "keepalive_interval": "Hoe vaak een actief setpoint opnieuw wordt verstuurd (standaard 30)",
+          "control_timeout": "Hoe lang de batterij een setpoint vasthoudt zonder verversing voordat hij zichzelf vrijgeeft (standaard 90, moet groter zijn dan het verversinterval)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_soc": { "name": "Laadpercentage" },
+      "battery_power": { "name": "Batterijvermogen" },
+      "battery_status": {
+        "name": "Batterijstatus",
+        "state": { "charging": "Opladen", "discharging": "Ontladen", "idle": "Inactief" }
+      },
+      "backup_power": { "name": "Noodstroomvermogen" },
+      "energy_charged": { "name": "Energie geladen" },
+      "energy_discharged": { "name": "Energie ontladen" },
+      "grid_voltage": { "name": "Netspanning" },
+      "grid_frequency": { "name": "Netfrequentie" },
+      "offgrid_voltage": { "name": "Noodstroomspanning" },
+      "battery_voltage": { "name": "Batterijspanning" },
+      "battery_soh": { "name": "Batterijgezondheid (SOH)" },
+      "temperature_1": { "name": "Omvormertemperatuur 1" },
+      "temperature_2": { "name": "Omvormertemperatuur 2" },
+      "inverter_status": { "name": "Omvormerstatus" },
+      "error_code": { "name": "Foutcode" },
+      "control_time_left": { "name": "Resterende aansturingstijd" },
+      "strategy_state": {
+        "name": "Strategie",
+        "state": {
+          "standby": "Standby",
+          "manual": "Handmatig vermogen",
+          "waiting": "Wachten op vraag",
+          "discharging_nom": "Ontladen naar nul op de meter",
+          "charging_nom": "Overschot laden naar nul op de meter",
+          "soc_protection": "Laden tot het minimale laadpercentage",
+          "fast_charging": "Snel opladen",
+          "fast_discharging": "Snel ontladen",
+          "dynamic_charging": "Laden in een goedkope periode",
+          "dynamic_discharging": "Ontladen in een dure periode",
+          "between_periods": "Inactief tussen prijsperiodes",
+          "soc_min_reached": "Minimaal laadpercentage bereikt",
+          "soc_max_reached": "Maximaal laadpercentage bereikt",
+          "discharge_not_allowed": "Ontladen nu niet toegestaan",
+          "charge_not_allowed": "Laden nu niet toegestaan",
+          "grid_sensor_unavailable": "Netvermogen-sensor niet beschikbaar",
+          "price_sensor_unavailable": "Prijssensor niet beschikbaar",
+          "no_telemetry": "Geen batterijgegevens"
+        }
+      },
+      "control_setpoint": { "name": "Vermogen-setpoint" },
+      "grid_power": { "name": "Netvermogen" },
+      "house_power": { "name": "Huisverbruik" },
+      "available_energy": { "name": "Beschikbare energie" },
+      "needed_energy": { "name": "Energie tot vol" },
+      "remaining_discharge_time": { "name": "Resterende ontlaadtijd" },
+      "remaining_charge_time": { "name": "Resterende oplaadtijd" },
+      "current_price": { "name": "Huidige prijs" },
+      "spread": { "name": "Spread" },
+      "spread_nom": { "name": "Spread NOM" },
+      "spread_tomorrow": { "name": "Spread morgen" },
+      "spread_nom_tomorrow": { "name": "Spread NOM morgen" },
+      "price_periods_today": { "name": "Prijsperiodes vandaag" },
+      "price_periods_tomorrow": { "name": "Prijsperiodes morgen" }
+    },
+    "binary_sensor": {
+      "cheap_period_active": { "name": "Goedkope periode" },
+      "expensive_period_active": { "name": "Dure periode" },
+      "controlling": { "name": "Aansturing actief" },
+      "dynamic_charging": { "name": "Dynamisch laden" },
+      "dynamic_discharging": { "name": "Dynamisch ontladen" },
+      "grid_sensor_available": { "name": "Netvermogen-sensor" },
+      "control_blocked": { "name": "Aansturing geblokkeerd" }
+    },
+    "select": {
+      "mode": {
+        "name": "Modus",
+        "state": {
+          "standby": "Standby",
+          "manual": "Handmatig",
+          "zero_on_meter": "Nul op de meter",
+          "dynamic_nom": "Dynamisch NOM",
+          "dynamic_nom_expensive": "Dynamisch NOM (duur)",
+          "dynamic_trading": "Dynamisch handelen",
+          "dynamic_trading_nom": "Dynamisch handelen + NOM",
+          "smart_discharge_only": "Alleen slim ontladen",
+          "smart_charge_only": "Alleen slim opladen",
+          "fast_charge": "Snel opladen",
+          "fast_discharge": "Snel ontladen"
+        }
+      }
+    },
+    "number": {
+      "manual_power": { "name": "Handmatig vermogen" },
+      "max_charge_power": { "name": "Max. oplaadvermogen" },
+      "max_discharge_power": { "name": "Max. ontlaadvermogen" },
+      "charge_start": { "name": "Opladen starten bij" },
+      "discharge_start": { "name": "Ontladen starten bij" },
+      "charge_margin": { "name": "Oplaadmarge" },
+      "discharge_margin": { "name": "Ontlaadmarge" },
+      "min_soc": { "name": "Minimaal laadpercentage" },
+      "max_soc": { "name": "Maximaal laadpercentage" },
+      "min_spread": { "name": "Minimale spread" },
+      "export_correction": { "name": "Exportcorrectie" },
+      "cheap_periods": { "name": "Goedkope periodes vandaag" },
+      "expensive_periods": { "name": "Dure periodes vandaag" },
+      "cheap_periods_tomorrow": { "name": "Goedkope periodes morgen" },
+      "expensive_periods_tomorrow": { "name": "Dure periodes morgen" }
+    },
+    "switch": {
+      "backup_output": { "name": "Noodstroomuitgang" },
+      "soc_protection": { "name": "SOC-bescherming" },
+      "quarter_hour_periods": { "name": "Kwartierperiodes" }
+    },
+    "text": {
+      "manual_periods": { "name": "Handmatige periodes vandaag" },
+      "manual_periods_tomorrow": { "name": "Handmatige periodes morgen" }
+    },
+    "button": {
+      "release_control": { "name": "Aansturing vrijgeven" },
+      "apply_recommended_settings": { "name": "Adviesinstellingen overnemen" }
+    }
+  },
+  "issues": {
+    "hems_blocked": {
+      "title": "{device_name} negeert vermogensopdrachten",
+      "description": "De batterij bevestigt elk setpoint, maar het gemeten vermogen volgt niet. Dit gebeurt als 'HEMS Managed' AAN staat in de SAMDUO-app: de batterij regelt zichzelf dan met zijn eigen P1-meter en negeert externe opdrachten stilzwijgend. Zet 'HEMS Managed' UIT op de apparaatinstellingen-pagina in de app."
+    },
+    "missing_grid_sensor": {
+      "title": "{device_name} heeft een netvermogen-sensor nodig",
+      "description": "De gekozen modus balanceert de batterij op de meter, maar er is geen netvermogen-sensor ingesteld. Open de opties van de integratie en kies de sensor die je P1-vermogen in watt geeft (positief = afname, negatief = teruglevering)."
+    },
+    "missing_price_sensor": {
+      "title": "{device_name} heeft een energieprijs-sensor nodig",
+      "description": "De gekozen modus gebruikt dynamische energieprijzen, maar er is geen prijssensor ingesteld. Open de opties van de integratie en kies een Nordpool-, ENTSO-e- of EnergyZero-prijssensor."
+    }
+  },
+  "exceptions": {
+    "set_failed": {
+      "message": "De opdracht voor {entity} heeft de batterij niet bereikt. Controleer de verbinding en sluit de SAMDUO-app (de batterij beantwoordt één verbinding tegelijk)."
+    },
+    "set_rejected": {
+      "message": "{entity} kan niet op die waarde worden gezet: {reason}"
+    }
+  }
+}

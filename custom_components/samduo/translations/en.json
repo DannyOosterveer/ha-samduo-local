@@ -1,0 +1,204 @@
+{
+  "config": {
+    "flow_title": "{name} ({host})",
+    "step": {
+      "user": {
+        "title": "SAMDUO Nex battery",
+        "description": "Connect to a SAMDUO Nex battery on your local network. The serial number is read from the battery. Switch 'HEMS Managed' OFF in the SAMDUO app, otherwise the battery ignores every command.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "name": "Name"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the battery",
+          "port": "TCP port of the Open API (default 3335)",
+          "name": "Name of the battery in Home Assistant; it also prefixes the entity ids"
+        }
+      },
+      "zeroconf_confirm": {
+        "title": "SAMDUO battery found",
+        "description": "Add the {model} at {host} (serial {serial})? Switch 'HEMS Managed' OFF in the SAMDUO app before using any of the control modes.",
+        "data": {
+          "name": "Name"
+        },
+        "data_description": {
+          "name": "Name of the battery in Home Assistant; it also prefixes the entity ids"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the battery. Check the host and port, and close the SAMDUO app: the battery answers only one connection at a time."
+    },
+    "abort": {
+      "already_configured": "This battery is already configured",
+      "not_supported": "This SAMDUO device is not a supported battery"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SAMDUO Nex options",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "grid_power_entity": "Grid power sensor (P1)",
+          "price_entity": "Energy price sensor",
+          "capacity_kwh": "Battery capacity (kWh)",
+          "poll_interval": "Poll interval (seconds)",
+          "keepalive_interval": "Setpoint refresh interval (seconds)",
+          "control_timeout": "Control watchdog timeout (seconds)"
+        },
+        "data_description": {
+          "host": "IP address or hostname of the battery",
+          "port": "TCP port of the Open API (default 3335)",
+          "grid_power_entity": "Power at the meter in watts: positive = importing, negative = exporting. Needed for every zero-on-the-meter mode. A HomeWizard P1 or any fast-updating P1/CT sensor works.",
+          "price_entity": "A sensor with today's (and tomorrow's) prices in its attributes, such as Nordpool, ENTSO-e or EnergyZero. Needed for the dynamic modes.",
+          "capacity_kwh": "Used for the available/needed energy and remaining time sensors",
+          "poll_interval": "How often the battery is read and the strategy runs (default 5)",
+          "keepalive_interval": "How often an active setpoint is re-sent (default 30)",
+          "control_timeout": "How long the battery keeps a setpoint without a refresh before it frees itself (default 90, must exceed the refresh interval)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_soc": { "name": "Battery SOC" },
+      "battery_power": { "name": "Battery power" },
+      "battery_status": {
+        "name": "Battery status",
+        "state": { "charging": "Charging", "discharging": "Discharging", "idle": "Idle" }
+      },
+      "backup_power": { "name": "Backup power" },
+      "energy_charged": { "name": "Energy charged" },
+      "energy_discharged": { "name": "Energy discharged" },
+      "grid_voltage": { "name": "Grid voltage" },
+      "grid_frequency": { "name": "Grid frequency" },
+      "offgrid_voltage": { "name": "Off-grid voltage" },
+      "battery_voltage": { "name": "Battery voltage" },
+      "battery_soh": { "name": "Battery SOH" },
+      "temperature_1": { "name": "Inverter temperature 1" },
+      "temperature_2": { "name": "Inverter temperature 2" },
+      "inverter_status": { "name": "Inverter status" },
+      "error_code": { "name": "Error code" },
+      "control_time_left": { "name": "Control time remaining" },
+      "strategy_state": {
+        "name": "Strategy",
+        "state": {
+          "standby": "Standby",
+          "manual": "Manual power",
+          "waiting": "Waiting for demand",
+          "discharging_nom": "Discharging to zero on the meter",
+          "charging_nom": "Charging surplus to zero on the meter",
+          "soc_protection": "Charging to the minimum SOC",
+          "fast_charging": "Fast charging",
+          "fast_discharging": "Fast discharging",
+          "dynamic_charging": "Charging in a cheap period",
+          "dynamic_discharging": "Discharging in an expensive period",
+          "between_periods": "Idle between price periods",
+          "soc_min_reached": "Minimum SOC reached",
+          "soc_max_reached": "Maximum SOC reached",
+          "discharge_not_allowed": "Discharging not allowed now",
+          "charge_not_allowed": "Charging not allowed now",
+          "grid_sensor_unavailable": "Grid power sensor unavailable",
+          "price_sensor_unavailable": "Price sensor unavailable",
+          "no_telemetry": "No battery data"
+        }
+      },
+      "control_setpoint": { "name": "Power setpoint" },
+      "grid_power": { "name": "Grid power" },
+      "house_power": { "name": "House consumption" },
+      "available_energy": { "name": "Available energy" },
+      "needed_energy": { "name": "Energy to full" },
+      "remaining_discharge_time": { "name": "Remaining discharge time" },
+      "remaining_charge_time": { "name": "Remaining charge time" },
+      "current_price": { "name": "Current price" },
+      "spread": { "name": "Spread" },
+      "spread_nom": { "name": "Spread NOM" },
+      "spread_tomorrow": { "name": "Spread tomorrow" },
+      "spread_nom_tomorrow": { "name": "Spread NOM tomorrow" },
+      "price_periods_today": { "name": "Price periods today" },
+      "price_periods_tomorrow": { "name": "Price periods tomorrow" }
+    },
+    "binary_sensor": {
+      "cheap_period_active": { "name": "Cheap period" },
+      "expensive_period_active": { "name": "Expensive period" },
+      "controlling": { "name": "Controlling" },
+      "dynamic_charging": { "name": "Dynamic charging" },
+      "dynamic_discharging": { "name": "Dynamic discharging" },
+      "grid_sensor_available": { "name": "Grid power sensor" },
+      "control_blocked": { "name": "Control blocked" }
+    },
+    "select": {
+      "mode": {
+        "name": "Mode",
+        "state": {
+          "standby": "Standby",
+          "manual": "Manual",
+          "zero_on_meter": "Zero on the meter",
+          "dynamic_nom": "Dynamic NOM",
+          "dynamic_nom_expensive": "Dynamic NOM (expensive only)",
+          "dynamic_trading": "Dynamic trading",
+          "dynamic_trading_nom": "Dynamic trading + NOM",
+          "smart_discharge_only": "Smart discharge only",
+          "smart_charge_only": "Smart charge only",
+          "fast_charge": "Fast charge",
+          "fast_discharge": "Fast discharge"
+        }
+      }
+    },
+    "number": {
+      "manual_power": { "name": "Manual power" },
+      "max_charge_power": { "name": "Max charge power" },
+      "max_discharge_power": { "name": "Max discharge power" },
+      "charge_start": { "name": "Start charging at" },
+      "discharge_start": { "name": "Start discharging at" },
+      "charge_margin": { "name": "Charge margin" },
+      "discharge_margin": { "name": "Discharge margin" },
+      "min_soc": { "name": "Minimum SOC" },
+      "max_soc": { "name": "Maximum SOC" },
+      "min_spread": { "name": "Minimum spread" },
+      "export_correction": { "name": "Export correction" },
+      "cheap_periods": { "name": "Cheap periods today" },
+      "expensive_periods": { "name": "Expensive periods today" },
+      "cheap_periods_tomorrow": { "name": "Cheap periods tomorrow" },
+      "expensive_periods_tomorrow": { "name": "Expensive periods tomorrow" }
+    },
+    "switch": {
+      "backup_output": { "name": "Backup output" },
+      "soc_protection": { "name": "SOC protection" },
+      "quarter_hour_periods": { "name": "15-minute periods" }
+    },
+    "text": {
+      "manual_periods": { "name": "Manual periods today" },
+      "manual_periods_tomorrow": { "name": "Manual periods tomorrow" }
+    },
+    "button": {
+      "release_control": { "name": "Release control" },
+      "apply_recommended_settings": { "name": "Apply recommended settings" }
+    }
+  },
+  "issues": {
+    "hems_blocked": {
+      "title": "{device_name} ignores power commands",
+      "description": "The battery confirms every setpoint but its measured power does not follow. This happens when 'HEMS Managed' is switched ON in the SAMDUO app: the battery then manages itself with its own P1 meter and silently ignores external commands. Switch 'HEMS Managed' OFF on the battery's device settings page in the app."
+    },
+    "missing_grid_sensor": {
+      "title": "{device_name} needs a grid power sensor",
+      "description": "The selected mode balances the battery against the meter, but no grid power sensor is configured. Open the integration options and choose the sensor that reports your P1 power in watts (positive = import, negative = export)."
+    },
+    "missing_price_sensor": {
+      "title": "{device_name} needs an energy price sensor",
+      "description": "The selected mode uses dynamic energy prices, but no price sensor is configured. Open the integration options and choose a Nordpool, ENTSO-e or EnergyZero price sensor."
+    }
+  },
+  "exceptions": {
+    "set_failed": {
+      "message": "The command for {entity} did not reach the battery. Check the connection and close the SAMDUO app (the battery answers one connection at a time)."
+    },
+    "set_rejected": {
+      "message": "{entity} cannot be set to that value: {reason}"
+    }
+  }
+}

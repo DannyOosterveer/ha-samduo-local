@@ -1,0 +1,4 @@
+# pytest-homeassistant-custom-component pins the whole test stack
+# (homeassistant, pytest, pytest-asyncio, pytest-socket, ...).
+pytest-homeassistant-custom-component==0.13.371
+ruff==0.17.0
