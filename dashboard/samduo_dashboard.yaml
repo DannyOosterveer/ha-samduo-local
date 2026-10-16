@@ -54,103 +54,82 @@ views:
                 entity: sensor.samduo_house_consumption
                 name: House
                 color: blue
+          # Battery and grid power, last 3 hours. Above zero the battery is
+          # discharging / the house imports; below zero it is charging / exporting.
           - type: custom:apexcharts-card
             graph_span: 3h
             update_interval: 10s
             header:
               show: true
-              title: Last 3 hours
-              show_states: true
-              colorize_states: true
+              title: Power, last 3 hours
+              show_states: false
+            show:
+              last_updated: false
             apex_config:
               chart:
-                height: 260
+                height: 230
               legend:
-                show: true
+                position: top
               stroke:
                 width: 2
+                curve: stepline
               yaxis:
-                - id: power
-                  decimalsInFloat: 0
-                  title:
-                    text: W
-                - id: soc
-                  opposite: true
-                  min: 0
-                  max: 100
-                  decimalsInFloat: 0
-                  title:
-                    text: "%"
+                decimalsInFloat: 0
+                forceNiceScale: true
+                title:
+                  text: W
             series:
               - entity: sensor.samduo_battery_power
-                name: Battery
-                yaxis_id: power
+                name: Battery (+ discharging, − charging)
                 type: area
                 color: "#4caf50"
-                opacity: 0.25
+                opacity: 0.3
+                show:
+                  legend_value: false
                 group_by:
                   duration: 1min
                   func: avg
               - entity: sensor.samduo_grid_power
-                name: Grid
-                yaxis_id: power
-                type: area
+                name: Grid (+ import, − export)
+                type: line
                 color: "#f44336"
-                opacity: 0.2
+                show:
+                  legend_value: false
                 group_by:
                   duration: 1min
                   func: avg
-              - entity: sensor.samduo_battery_soc
-                name: SOC
-                yaxis_id: soc
-                type: line
-                color: "#2196f3"
-                stroke_width: 2
+          # State of charge over the day.
           - type: custom:apexcharts-card
             graph_span: 24h
             span:
               start: day
             header:
               show: true
-              title: Today
+              title: State of charge today
               show_states: false
+            show:
+              last_updated: false
             apex_config:
               chart:
-                height: 220
+                height: 180
+              legend:
+                show: false
               stroke:
-                width: 1
+                width: 2
               yaxis:
-                - id: power
-                  decimalsInFloat: 0
-                - id: soc
-                  opposite: true
-                  min: 0
-                  max: 100
-                  decimalsInFloat: 0
+                min: 0
+                max: 100
+                tickAmount: 4
+                decimalsInFloat: 0
+                title:
+                  text: "%"
             series:
-              - entity: sensor.samduo_battery_power
-                name: Battery
-                yaxis_id: power
-                type: area
-                color: "#4caf50"
-                opacity: 0.25
-                group_by:
-                  duration: 5min
-                  func: avg
-              - entity: sensor.samduo_grid_power
-                name: Grid
-                yaxis_id: power
-                type: area
-                color: "#f44336"
-                opacity: 0.2
-                group_by:
-                  duration: 5min
-                  func: avg
               - entity: sensor.samduo_battery_soc
                 name: SOC
-                yaxis_id: soc
-                type: line
+                type: area
                 color: "#2196f3"
+                opacity: 0.2
+                extend_to: now
           - type: entities
             title: Energy
             entities:
@@ -260,47 +239,134 @@ views:
               - type: entity
                 entity: binary_sensor.samduo_expensive_period
                 show_name: false
+          # One bar per period: green = cheap (charging), red = expensive
+          # (discharging), grey = the rest. The three series are stacked so a
+          # period never shows more than one bar.
           - type: custom:apexcharts-card
             graph_span: 24h
             span:
               start: day
-            now:
-              show: true
-              label: now
             header:
               show: true
               title: Prices today
               show_states: false
+            show:
+              last_updated: false
             apex_config:
               chart:
                 height: 220
+                stacked: true
+              legend:
+                position: top
+              plotOptions:
+                bar:
+                  columnWidth: "85%"
+              dataLabels:
+                enabled: false
               yaxis:
                 decimalsInFloat: 2
+                forceNiceScale: true
+              xaxis:
+                labels:
+                  datetimeFormatter:
+                    hour: "HH:mm"
             series:
-              - entity: sensor.samduo_price_periods_today
-                name: Price
-                type: column
-                unit: €/kWh
-                float_precision: 4
-                color: "#9e9e9e"
-                data_generator: |
-                  return (entity.attributes.periods || []).map(p => [new Date(p.start).getTime(), p.value]);
               - entity: sensor.samduo_price_periods_today
                 name: Cheap
                 type: column
+                color: "#4caf50"
+                opacity: 1
                 unit: €/kWh
                 float_precision: 4
-                color: "#4caf50"
+                show:
+                  legend_value: false
+                  in_legend: true
                 data_generator: |
-                  return (entity.attributes.periods || []).filter(p => p.cheap).map(p => [new Date(p.start).getTime(), p.value]);
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.cheap) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_today
+                name: Cheap
+                type: column
+                color: "#4caf50"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.cheap) && (end <= now) ? p.value : 0];
+                  });
               - entity: sensor.samduo_price_periods_today
                 name: Expensive
                 type: column
+                color: "#f44336"
+                opacity: 1
                 unit: €/kWh
                 float_precision: 4
-                color: "#f44336"
+                show:
+                  legend_value: false
+                  in_legend: true
                 data_generator: |
-                  return (entity.attributes.periods || []).filter(p => p.expensive).map(p => [new Date(p.start).getTime(), p.value]);
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.expensive && !p.cheap) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_today
+                name: Expensive
+                type: column
+                color: "#f44336"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.expensive && !p.cheap) && (end <= now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_today
+                name: Normal
+                type: column
+                color: "#9e9e9e"
+                opacity: 1
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: true
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (!p.cheap && !p.expensive) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_today
+                name: Normal
+                type: column
+                color: "#9e9e9e"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (!p.cheap && !p.expensive) && (end <= now) ? p.value : 0];
+                  });
           - type: horizontal-stack
             cards:
               - type: tile
@@ -309,6 +375,12 @@ views:
               - type: tile
                 entity: sensor.samduo_spread_nom
                 name: Spread NOM
+          - type: markdown
+            content: >
+              {% set cheap = state_attr('sensor.samduo_price_periods_today', 'cheap') or [] %}
+              {% set expensive = state_attr('sensor.samduo_price_periods_today', 'expensive') or [] %}
+              **Cheapest today:** {{ cheap | map('regex_replace', ' - .*', '') | join(', ') if cheap else 'none' }}<br>
+              **Most expensive today:** {{ expensive | map('regex_replace', ' - .*', '') | join(', ') if expensive else 'none' }}
           - type: entities
             title: Today
             entities:
@@ -318,10 +390,6 @@ views:
                 name: Expensive periods
               - entity: text.samduo_manual_periods_today
                 name: Manual periods
-              - type: attribute
-                entity: sensor.samduo_price_periods_today
-                attribute: cheap
-                name: Cheapest periods
           - type: custom:apexcharts-card
             graph_span: 24h
             span:
@@ -331,36 +399,123 @@ views:
               show: true
               title: Prices tomorrow
               show_states: false
+            show:
+              last_updated: false
             apex_config:
               chart:
                 height: 220
+                stacked: true
+              legend:
+                position: top
+              plotOptions:
+                bar:
+                  columnWidth: "85%"
+              dataLabels:
+                enabled: false
               yaxis:
                 decimalsInFloat: 2
+                forceNiceScale: true
+              xaxis:
+                labels:
+                  datetimeFormatter:
+                    hour: "HH:mm"
             series:
-              - entity: sensor.samduo_price_periods_tomorrow
-                name: Price
-                type: column
-                unit: €/kWh
-                float_precision: 4
-                color: "#9e9e9e"
-                data_generator: |
-                  return (entity.attributes.periods || []).map(p => [new Date(p.start).getTime(), p.value]);
               - entity: sensor.samduo_price_periods_tomorrow
                 name: Cheap
                 type: column
+                color: "#4caf50"
+                opacity: 1
                 unit: €/kWh
                 float_precision: 4
-                color: "#4caf50"
+                show:
+                  legend_value: false
+                  in_legend: true
                 data_generator: |
-                  return (entity.attributes.periods || []).filter(p => p.cheap).map(p => [new Date(p.start).getTime(), p.value]);
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.cheap) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Cheap
+                type: column
+                color: "#4caf50"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.cheap) && (end <= now) ? p.value : 0];
+                  });
               - entity: sensor.samduo_price_periods_tomorrow
                 name: Expensive
                 type: column
+                color: "#f44336"
+                opacity: 1
                 unit: €/kWh
                 float_precision: 4
-                color: "#f44336"
+                show:
+                  legend_value: false
+                  in_legend: true
                 data_generator: |
-                  return (entity.attributes.periods || []).filter(p => p.expensive).map(p => [new Date(p.start).getTime(), p.value]);
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.expensive && !p.cheap) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Expensive
+                type: column
+                color: "#f44336"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (p.expensive && !p.cheap) && (end <= now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Normal
+                type: column
+                color: "#9e9e9e"
+                opacity: 1
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: true
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (!p.cheap && !p.expensive) && (end > now) ? p.value : 0];
+                  });
+              - entity: sensor.samduo_price_periods_tomorrow
+                name: Normal
+                type: column
+                color: "#9e9e9e"
+                opacity: 0.3
+                unit: €/kWh
+                float_precision: 4
+                show:
+                  legend_value: false
+                  in_legend: false
+                data_generator: |
+                  const now = Date.now();
+                  return (entity.attributes.periods || []).map(p => {
+                    const start = new Date(p.start).getTime(), end = new Date(p.end).getTime();
+                    return [(start + end) / 2, (!p.cheap && !p.expensive) && (end <= now) ? p.value : 0];
+                  });
           - type: horizontal-stack
             cards:
               - type: tile
@@ -369,6 +524,12 @@ views:
               - type: tile
                 entity: sensor.samduo_spread_nom_tomorrow
                 name: Spread NOM
+          - type: markdown
+            content: >
+              {% set cheap = state_attr('sensor.samduo_price_periods_tomorrow', 'cheap') or [] %}
+              {% set expensive = state_attr('sensor.samduo_price_periods_tomorrow', 'expensive') or [] %}
+              **Cheapest tomorrow:** {{ cheap | map('regex_replace', ' - .*', '') | join(', ') if cheap else 'not yet known' }}<br>
+              **Most expensive tomorrow:** {{ expensive | map('regex_replace', ' - .*', '') | join(', ') if expensive else 'not yet known' }}
           - type: entities
             title: Tomorrow and settings
             entities:
@@ -415,9 +576,9 @@ views:
             hours_to_show: 24
             entities:
               - entity: sensor.samduo_inverter_temperature_1
-                name: Inverter temperature 1
+                name: Inverter 1
               - entity: sensor.samduo_inverter_temperature_2
-                name: Inverter temperature 2
+                name: Inverter 2
       - type: grid
         cards:
           - type: heading
@@ -444,4 +605,6 @@ views:
             hours_to_show: 24
             entities:
               - entity: select.samduo_mode
+                name: Mode
               - entity: sensor.samduo_strategy
+                name: Strategy
