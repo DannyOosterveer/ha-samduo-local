@@ -263,20 +263,6 @@ clamped to the **Max charge power** / **Max discharge power** settings (default
 800 W, the grid-compliant figure; the E6000 inverter is rated 2600 W). Keep these
 at or below the limit set in the SAMDUO app.
 
-## Development
-
-```bash
-uv venv --python 3.14 .venv
-uv pip install --python .venv/bin/python -r requirements_test.txt
-.venv/bin/python -m pytest
-.venv/bin/ruff check . && .venv/bin/ruff format --check .
-```
-
-The protocol layer, the price logic and the strategy engine are pure Python with
-no Home Assistant dependency and are tested with hand-written readings; the
-integration itself is tested with the Home Assistant test framework and a mocked
-battery, and the client against a fake battery on a real socket.
-
 ## Acknowledgements
 
 - SAMDUO, for publishing the Open API Protocol.
