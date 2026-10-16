@@ -134,6 +134,11 @@ The **Price periods today/tomorrow** sensors carry the full period list, with
 cheap/expensive flags, in their attributes; the dashboard charts are drawn from
 them.
 
+The plug-and-play dashboard with the mode selector, the control settings and the
+dynamic prices (cheap periods green, expensive red, hours gone by faded):
+
+![SAMDUO Nex dashboard](images/dashboard.png)
+
 ## Entities
 
 Entity ids below assume the battery is named *Samduo*. All sensors update every
