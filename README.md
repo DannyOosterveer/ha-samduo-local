@@ -136,23 +136,95 @@ them.
 
 ## Entities
 
-Telemetry (every 5 s): battery SOC, battery power, battery status, backup power,
-energy charged / discharged (`total_increasing`, Energy Dashboard ready), grid
-voltage / frequency, off-grid voltage, battery voltage, SOH, two inverter
-temperatures, inverter status, error code, control time remaining.
+Entity ids below assume the battery is named *Samduo*. All sensors update every
+poll (5 s by default). *Diagnostic* entities are hidden from the default device
+view; *Config* entities are the strategy settings and survive a restart.
 
-Strategy: strategy state, power setpoint, grid power, house consumption,
-available energy, energy to full, remaining charge / discharge time, current
-price, spread (today / tomorrow, plain / NOM), price periods (today / tomorrow),
-cheap / expensive period flags, controlling, dynamic charging / discharging,
-grid sensor available, control blocked.
+### Battery telemetry (sensors)
 
-Settings (restored after a restart): mode, manual power, max charge / discharge
-power, start charging / discharging at, charge / discharge margin, minimum /
-maximum SOC, minimum spread, export correction, cheap / expensive periods (today
-and tomorrow), manual periods (today and tomorrow), SOC protection, 15-minute
-periods. Plus the backup output switch, and the *Release control* and *Apply
-recommended settings* buttons.
+| Entity | Unit | Notes |
+|---|---|---|
+| `sensor.samduo_battery_soc` | % | State of charge, dynamic battery icon |
+| `sensor.samduo_battery_power` | W | **Positive = discharging, negative = charging** |
+| `sensor.samduo_battery_status` | | `charging` / `discharging` / `idle` (±10 W deadband) |
+| `sensor.samduo_backup_power` | W | Off-grid (EPS) output |
+| `sensor.samduo_energy_charged` | kWh | Device counter, `total_increasing`, Energy Dashboard ready |
+| `sensor.samduo_energy_discharged` | kWh | Device counter, `total_increasing`, Energy Dashboard ready |
+| `sensor.samduo_grid_voltage` | V | Diagnostic |
+| `sensor.samduo_grid_frequency` | Hz | Diagnostic |
+| `sensor.samduo_off_grid_voltage` | V | Diagnostic |
+| `sensor.samduo_battery_voltage` | V | Diagnostic |
+| `sensor.samduo_battery_soh` | % | State of health, diagnostic |
+| `sensor.samduo_inverter_temperature_1` | °C | Diagnostic |
+| `sensor.samduo_inverter_temperature_2` | °C | Diagnostic |
+| `sensor.samduo_inverter_status` | | `normal`, or `unknown_<n>` for undocumented states, diagnostic |
+| `sensor.samduo_error_code` | | Raw `inv_err1`; bit meanings are not documented by SAMDUO, diagnostic |
+| `sensor.samduo_control_time_remaining` | s | Watchdog countdown of the active setpoint, diagnostic |
+
+### Strategy (sensors)
+
+| Entity | Unit | Notes |
+|---|---|---|
+| `sensor.samduo_strategy` | | What the engine is doing now, e.g. *Discharging to zero on the meter*, *Waiting for demand*, *Charging in a cheap period* |
+| `sensor.samduo_power_setpoint` | W | The setpoint currently held on the battery; attribute `controlling` |
+| `sensor.samduo_grid_power` | W | Mirror of the configured P1 sensor (positive = import) |
+| `sensor.samduo_house_consumption` | W | Grid power + battery power: what the house uses |
+| `sensor.samduo_available_energy` | kWh | Energy between the current SOC and the minimum SOC |
+| `sensor.samduo_energy_to_full` | kWh | Energy between the current SOC and the maximum SOC |
+| `sensor.samduo_remaining_discharge_time` | min | At the current discharge power |
+| `sensor.samduo_remaining_charge_time` | min | At the current charge power |
+| `sensor.samduo_current_price` | €/kWh | Price of the running period |
+| `sensor.samduo_spread` | % | Expensive vs cheap periods today, minus the export correction |
+| `sensor.samduo_spread_nom` | % | Same, counting only expensive periods after the first cheap one |
+| `sensor.samduo_spread_tomorrow` | % | |
+| `sensor.samduo_spread_nom_tomorrow` | % | |
+| `sensor.samduo_price_periods_today` | | Number of periods; attributes `periods` (start, end, value, cheap, expensive), `cheap`, `expensive`, `min`, `max` |
+| `sensor.samduo_price_periods_tomorrow` | | Same for tomorrow |
+
+### Binary sensors
+
+| Entity | Notes |
+|---|---|
+| `binary_sensor.samduo_cheap_period` | On during a cheap period |
+| `binary_sensor.samduo_expensive_period` | On during an expensive period |
+| `binary_sensor.samduo_controlling` | On while the integration holds a setpoint on the battery |
+| `binary_sensor.samduo_dynamic_charging` | On while a cheap-period charge is running |
+| `binary_sensor.samduo_dynamic_discharging` | On while an expensive-period discharge is running |
+| `binary_sensor.samduo_grid_power_sensor` | Connectivity: the P1 sensor is available and fresh, diagnostic |
+| `binary_sensor.samduo_control_blocked` | Problem: the battery confirms setpoints but ignores them (HEMS Managed is on), diagnostic |
+
+### Controls
+
+| Entity | Type | Range / options | Notes |
+|---|---|---|---|
+| `select.samduo_mode` | select | the eleven [modes](#modes) | The one entity that decides what the battery does |
+| `number.samduo_manual_power` | number | −2600 … 2600 W | Used in *Manual* mode; positive = discharge |
+| `switch.samduo_backup_output` | switch | | Off-grid (EPS) output on the device |
+| `button.samduo_release_control` | button | | Selects *Standby* and hands the battery back to itself |
+| `button.samduo_apply_recommended_settings` | button | | Loads the recommended values into all settings below |
+
+### Settings (config entities, restored after a restart)
+
+| Entity | Range | Recommended | Notes |
+|---|---|---|---|
+| `number.samduo_max_charge_power` | 100 … 2600 W | 800 | Upper bound for every charge command |
+| `number.samduo_max_discharge_power` | 100 … 2600 W | 800 | Upper bound for every discharge command |
+| `number.samduo_start_charging_at` | −1000 … −30 W | −300 | Export at which NOM starts charging |
+| `number.samduo_start_discharging_at` | 30 … 1000 W | 100 | Import at which NOM starts discharging |
+| `number.samduo_charge_margin` | 0 … 250 W | 50 | Export left on the meter while charging |
+| `number.samduo_discharge_margin` | −100 … 250 W | 5 | Extra power delivered while discharging |
+| `number.samduo_minimum_soc` | 5 … 50 % | 10 | Discharging stops here; SOC protection tops up to here |
+| `number.samduo_maximum_soc` | 50 … 100 % | 100 | Charging stops here |
+| `number.samduo_minimum_spread` | 0 … 500 % | 25 | Dynamic modes act only when the spread is at least this |
+| `number.samduo_export_correction` | 0 … 0.5 €/kWh | 0 | Taken off the expensive average in the spread |
+| `number.samduo_cheap_periods_today` | 0 … 96 | 3 | Number of cheapest periods to charge in |
+| `number.samduo_expensive_periods_today` | 0 … 96 | 21 | Number of most expensive periods to discharge in |
+| `number.samduo_cheap_periods_tomorrow` | 0 … 96 | 3 | Copied to *today* at midnight |
+| `number.samduo_expensive_periods_tomorrow` | 0 … 96 | 21 | Copied to *today* at midnight |
+| `text.samduo_manual_periods_today` | | empty | `G02:00;D18:00-21:00` overrides the automatic selection |
+| `text.samduo_manual_periods_tomorrow` | | empty | Copied to *today* at midnight, then cleared |
+| `switch.samduo_soc_protection` | | on | Top up to the minimum SOC from the grid when below it |
+| `switch.samduo_15_minute_periods` | | off | Use quarter-hourly instead of hourly price periods |
 
 ### Sign convention
 
