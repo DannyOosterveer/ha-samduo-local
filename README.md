@@ -11,8 +11,10 @@ eleven built-in charging strategies: from plain *zero on the meter* to trading o
 dynamic energy prices. Everything runs inside the integration; no YAML packages,
 no helper automations, no Node-RED.
 
-The strategies and the dashboard follow the great work from
-[Zendure zenSDK package by Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK).
+The modes, their names and their settings behave like those in the
+[Zendure zenSDK package by Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK),
+so anyone who knows that package feels at home. The implementation is this
+integration's own Python and shares no code with it.
 
 > **Status: early.** Built against the SAMDUO Open API Protocol V1.0 and tested
 > on a Nex E6000 (firmware 0.0.1.10). Other Nex models speak the same protocol per
@@ -268,8 +270,9 @@ at or below the limit set in the SAMDUO app.
 ## Acknowledgements
 
 - SAMDUO, for publishing the Open API Protocol.
-- [Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK) for the strategy and
-  dashboard design the modes are modelled on.
+- [Gielz1986](https://github.com/Gielz1986/Zendure-HA-zenSDK), whose Zendure
+  package defined the modes, settings and manual-period syntax this integration
+  behaves like. The code here is an independent implementation.
 
 ## License
 

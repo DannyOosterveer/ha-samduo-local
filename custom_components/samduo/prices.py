@@ -6,8 +6,8 @@ understood (Nordpool ``raw_today``/``raw_tomorrow``, ENTSO-e
 ``prices_today``/``prices_tomorrow``, and generic ``prices`` lists with a
 timestamp and a price per entry).
 
-Terminology follows the Zendure community package this is modelled on:
-a day has N *cheap* periods (when the battery is charged from the grid) and
+Terminology is that of the Zendure community package by Gielz1986, whose
+behaviour these modes share: a day has N *cheap* periods (when the battery is charged from the grid) and
 M *expensive* periods (when it is discharged), and the *spread* is the
 relative price difference between the two groups.
 """

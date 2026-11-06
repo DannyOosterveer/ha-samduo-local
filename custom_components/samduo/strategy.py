@@ -10,8 +10,9 @@ Sign conventions (never flipped anywhere in this integration):
   (the device's own convention, also what EMHASS expects);
 * grid power: positive = importing from the grid, negative = exporting.
 
-The modes follow the Zendure community package by Gielz1986 closely, so a
-user coming from there finds the same knobs with the same meaning.
+The modes, their names and their settings behave like those in the Zendure
+community package by Gielz1986, so a user coming from there finds the same
+knobs with the same meaning. The code is an independent implementation.
 """
 
 from __future__ import annotations
