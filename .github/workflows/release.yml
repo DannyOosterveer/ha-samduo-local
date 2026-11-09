@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions: {}
+
+jobs:
+  zip:
+    name: Attach integration zip
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Zip the integration directory
+        shell: bash
+        run: |
+          cd "${GITHUB_WORKSPACE}/custom_components/samduo"
+          zip -r "${GITHUB_WORKSPACE}/samduo.zip" .
+
+      - name: Upload the zip to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/samduo.zip

@@ -31,7 +31,7 @@ integration's own Python and shares no code with it.
 
 ## Requirements
 
-- Home Assistant 2025.3 or newer.
+- Home Assistant 2026.3 or newer.
 - The battery on the same LAN as Home Assistant (TCP port 3335).
 - **"HEMS Managed" switched OFF in the SAMDUO app.** With it on, the battery
   regulates itself on its own P1 meter and silently ignores every command. The
